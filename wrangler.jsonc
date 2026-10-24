@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tse-comparador",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./app/dist"
+  },
+  "routes": [
+    {
+      "pattern": "tse.rfelribeiro.com",
+      "custom_domain": true
+    }
+  ]
+}

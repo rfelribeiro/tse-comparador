@@ -13,8 +13,7 @@ import { renderBars, renderRanking } from './charts/bars';
 import { renderScatter } from './charts/scatter';
 import { renderTable } from './charts/table';
 
-// TODO: trocar pelo endereço real do repositório.
-export const REPO_URL = 'https://github.com/';
+export const REPO_URL = 'https://github.com/rfelribeiro/tse-comparador';
 
 const root = document.querySelector<HTMLDivElement>('#app')!;
 let state: State = parseHash();

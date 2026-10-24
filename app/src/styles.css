@@ -50,11 +50,11 @@ button:disabled { opacity: .45; cursor: default; }
 .kpi-rot { color: var(--text2); font-size: .8rem; }
 .kpi-val { font-size: 1.6rem; font-weight: 650; font-variant-numeric: tabular-nums; margin: 2px 0; }
 .kpi-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; font-size: .78rem; color: var(--text2); font-variant-numeric: tabular-nums; }
-.delta { font-weight: 600; } .delta.up { color: var(--up); } .delta.down { color: var(--down); } .delta.zero { color: var(--text2); }
+.delta { font-weight: 600; color: var(--text); }
 
 .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
-.p-map { grid-column: span 7; } .p-bars { grid-column: span 5; } .p-scatter { grid-column: span 5; } .p-table { grid-column: span 7; }
+.p-map { grid-column: span 7; } .p-bars { grid-column: span 5; } .p-scatter { grid-column: 1 / -1; } .p-table { grid-column: 1 / -1; }
 .panel-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
 .panel-h h2 { margin: 0; }
 .ctrls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -73,13 +73,22 @@ button:disabled { opacity: .45; cursor: default; }
 
 .tb-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .tb-busca { min-width: 180px; } .tb-info { color: var(--text2); font-size: .82rem; }
-.tb-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+.tb-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px;
+  /* sombras laterais indicam rolagem horizontal */
+  background: linear-gradient(to right, var(--surface) 30%, transparent) left / 40px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right / 40px 100% no-repeat local,
+    linear-gradient(to right, rgba(0,0,0,.28), transparent) left / 12px 100% no-repeat scroll,
+    linear-gradient(to left, rgba(0,0,0,.28), transparent) right / 12px 100% no-repeat scroll; }
+.tb .first { position: sticky; left: 0; background: var(--surface); z-index: 1; }
+.tb th.first { background: var(--surface2); z-index: 2; }
+.tb tbody tr:hover .first { background: var(--grid); }
+.tb tr.sel .first { background: color-mix(in srgb, var(--c-bolso) 18%, var(--surface)); }
+.hint-inline { color: var(--muted); font-size: .78rem; }
 .tb { width: 100%; border-collapse: collapse; font-size: .82rem; font-variant-numeric: tabular-nums; }
-.tb th, .tb td { padding: 6px 8px; border-bottom: 1px solid var(--grid); text-align: left; white-space: nowrap; }
+.tb th, .tb td { padding: 6px 7px; border-bottom: 1px solid var(--grid); text-align: left; white-space: nowrap; }
 .tb .n { text-align: right; }
 .tb th { cursor: pointer; background: var(--surface2); position: sticky; top: 0; user-select: none; }
 .tb tbody tr { cursor: pointer; } .tb tbody tr:hover { background: var(--grid); } .tb tr.sel { background: color-mix(in srgb, var(--c-bolso) 18%, transparent); }
-.delta-p { color: var(--up); } .delta-m { color: var(--down); }
 .tb-pag { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 8px; color: var(--text2); }
 
 .tt { font-size: 12px; min-width: 210px; } .tt table { border-collapse: collapse; margin: 4px 0; width: 100%; } .tt th { font-weight: 500; color: var(--text2); text-align: right; } .tt td { padding: 1px 6px 1px 0; } .tt td.n { text-align: right; font-variant-numeric: tabular-nums; } .tt .sub { color: var(--text2); }
@@ -98,6 +107,6 @@ button:disabled { opacity: .45; cursor: default; }
   .kpi-val { font-size: 1.35rem; }
   .top { flex-direction: column; }
   .chart { height: 340px; } .h260 { height: 240px; } .h330 { height: 340px; } .h400 { height: 340px; }
-  .ctrls label { width: 100%; justify-content: space-between; } .ctrls select { flex: 1; max-width: 70%; }
+  .ctrls label { width: 100%; justify-content: space-between; } #el-hint { width: 100%; } .ctrls select { flex: 1; max-width: 70%; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

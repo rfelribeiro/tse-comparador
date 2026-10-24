@@ -16,7 +16,7 @@ export function renderKpis(host: HTMLElement, ctx: Ctx): void {
   ];
   host.innerHTML = k.map((t) => {
     const d = diff(t.a, t.b);
-    const cls = d == null || Math.abs(d) < 0.05 ? 'zero' : d > 0 ? 'up' : 'down';
+    const cls = d == null || Math.abs(d) < 0.05 ? 'zero' : d > 0 ? 'up' : 'down'; // direção apenas, sem juízo de valor
     const seta = cls === 'up' ? '▲' : cls === 'down' ? '▼' : '■';
     return `<div class="kpi" ${t.campo ? `data-campo="${t.campo}"` : ''} role="group" aria-label="${esc(t.rot)}">
       <div class="kpi-rot">${esc(t.rot)}</div>

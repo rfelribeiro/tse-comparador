@@ -33,6 +33,25 @@ async function registrar(nome: string, uf: string): Promise<void> {
   registrados.add(nome);
 }
 
+type Caixa = [number, number, number, number];
+function caixa(coords: any, b: Caixa = [Infinity, Infinity, -Infinity, -Infinity]): Caixa {
+  if (typeof coords[0] === 'number') {
+    b[0] = Math.min(b[0], coords[0]); b[1] = Math.min(b[1], coords[1]); b[2] = Math.max(b[2], coords[0]); b[3] = Math.max(b[3], coords[1]);
+  } else for (const c of coords) caixa(c, b);
+  return b;
+}
+
+// Centro e zoom para enquadrar o município selecionado dentro do mapa atual.
+async function enquadrar(mapa: string, ibge: string): Promise<{ center: [number, number]; zoom: number } | null> {
+  const fc = (echarts.getMap(mapa) as any)?.geoJson;
+  const f = fc?.features?.find((x: any) => x.properties.id === ibge);
+  if (!f) return null;
+  const m = caixa(fc.features.map((x: any) => x.geometry.coordinates));
+  const b = caixa(f.geometry.coordinates);
+  const zoom = Math.max(1, Math.min(12, 0.3 * Math.min((m[2] - m[0]) / Math.max(b[2] - b[0], 1e-6), (m[3] - m[1]) / Math.max(b[3] - b[1], 1e-6))));
+  return { center: [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], zoom };
+}
+
 function quantil(a: number[], q: number): number {
   const s = a.slice().sort((x, y) => x - y);
   return s[Math.min(s.length - 1, Math.max(0, Math.floor(q * (s.length - 1))))] ?? 0;
@@ -64,7 +83,11 @@ export async function renderMap(chart: EChartsType, ctx: Ctx, aviso: HTMLElement
     unidades = todosMun(); mapa = 'mun-BR';
   } else { unidades = ufUnits().filter((u) => u.key !== 'ZZ'); mapa = 'ufs'; }
 
-  chart.showLoading({ text: 'Carregando mapa…', color: c.text2, textColor: c.text2, maskColor: 'transparent' });
+  const texto = mapa === 'mun-BR' ? 'Carregando municípios…' : 'Carregando mapa…';
+  chart.showLoading({ text: texto, color: c.text2, textColor: c.text2, maskColor: 'transparent' });
+  // cede ao navegador para pintar o estado de carregamento
+  await new Promise<void>((r) => requestAnimationFrame(() => setTimeout(r, 30)));
+  if (my !== token) return;
   await registrar(mapa, s.uf);
   if (my !== token) return;
   chart.hideLoading();
@@ -108,6 +131,9 @@ export async function renderMap(chart: EChartsType, ctx: Ctx, aviso: HTMLElement
     }];
   } else if (def.tipo === 'cat') legenda.innerHTML = legendaVencedor(c);
 
+  const selU = s.mun ? unidades.find((u) => u.key === s.mun) : undefined;
+  const vista = selU?.ibge ? await enquadrar(mapa, selU.ibge) : null;
+  if (my !== token) return;
   chart.setOption({
     animation: false,
     aria: { enabled: true },
@@ -117,12 +143,12 @@ export async function renderMap(chart: EChartsType, ctx: Ctx, aviso: HTMLElement
     },
     visualMap,
     series: [{
-      type: 'map', map: mapa, roam: true, scaleLimit: { min: 1, max: 20 }, selectedMode: 'single', aspectScale: 1,
+      type: 'map', map: mapa, roam: true, ...(vista ?? {}), scaleLimit: { min: 1, max: 20 }, selectedMode: 'single', aspectScale: 1,
       layoutCenter: ['50%', visualMap.length ? '46%' : '50%'], layoutSize: '100%',
       data: dados,
       itemStyle: { areaColor: c.nodata, borderColor: c.surface, borderWidth: nivelMun ? 0.25 : 0.8 },
       emphasis: { label: { show: false }, itemStyle: { borderColor: c.text, borderWidth: 1.5 } },
-      select: { label: { show: false }, itemStyle: { borderColor: c.text, borderWidth: 2 } },
+      select: { label: { show: false }, itemStyle: { borderColor: c.text, borderWidth: 3, shadowColor: c.text, shadowBlur: 8 } },
       label: { show: !nivelMun, color: c.text, fontSize: 10, textBorderColor: c.surface, textBorderWidth: 2, formatter: (p: any) => p.name },
     }],
   }, true);

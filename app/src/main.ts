@@ -41,7 +41,7 @@ root.innerHTML = `
           <button data-v="uf" type="button">UF</button><button data-v="mun" type="button">Município</button>
         </div>
         <label>Métrica <select id="metrica"></select></label>
-        <label>Eleição <select id="eleicao"></select></label>
+        <label>Eleição <select id="eleicao"></select></label><span id="el-hint" class="hint-inline" role="note"></span>
       </div>
     </div>
     <div class="map-box"><div id="c-map" class="chart" role="img" aria-label="Mapa coroplético"></div><p id="map-aviso" class="aviso"></p></div>
@@ -59,7 +59,7 @@ root.innerHTML = `
     <div class="panel-h"><h2>Dispersão: 2022 × 2026</h2>
       <div id="campo" class="seg" role="group" aria-label="Campo"><button data-v="pt" type="button">Lula</button><button data-v="bolso" type="button">Campo Bolsonaro</button></div></div>
     <div id="c-scatter" class="chart h400" role="img" aria-label="Dispersão dos municípios"></div>
-    <p class="hint">Cada ponto é um município (tamanho ∝ √eleitores aptos). Acima da linha tracejada: o campo cresceu em relação a 2022.</p>
+    <p class="hint">Cada ponto é um município (tamanho ∝ √eleitores aptos). Acima da linha tracejada: o campo cresceu em relação a 2022. “Outros” não aparece aqui: em 2022 o 2º turno teve só dois candidatos (0% por definição).</p>
   </section>
   <section class="panel p-table"><h2 id="t-table">Tabela</h2><div id="tabela"></div></section>
 </main>
@@ -97,7 +97,10 @@ function controles(): void {
   const se = $<HTMLSelectElement>('eleicao');
   if (!se.options.length) se.innerHTML = meta.elections.map((e) => `<option value="${e.id}">${e.label}</option>`).join('');
   se.value = state.eleicao;
-  se.disabled = !metricaDef(state.metrica).usaEleicao;
+  const usa = metricaDef(state.metrica).usaEleicao;
+  se.disabled = !usa;
+  const dica = usa ? '' : state.metrica === 'pct_outros' ? 'Só existe em 2026' : 'Métrica compara 2026 com 2022';
+  se.title = dica; $('el-hint').textContent = dica;
   const nv = $('nivel');
   nv.hidden = !!state.uf;
   nv.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === state.nivel)));

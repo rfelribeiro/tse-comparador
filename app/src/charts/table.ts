@@ -17,6 +17,8 @@ const COLS: Col[] = [
   { id: 'dabs', rot: 'Δ abstenção', val: (u) => diff(pctAbst(u.r22), pctAbst(u.r26)), fmt: D },
 ];
 const POR_PAGINA = 20;
+// Remove acentos, caixa e pontuação; palavras separadas por espaço.
+const dobrar = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 let sortId = 'nome';
 let sortDir = 1;
@@ -72,8 +74,8 @@ function desenhar(manterFoco: boolean): void {
   if (!cur) return;
   const { host, ctx, unidades } = cur;
   const col = COLS.find((c) => c.id === sortId)!;
-  const q = query.trim().toLowerCase();
-  let rows = unidades.filter((u) => !q || u.nome.toLowerCase().includes(q) || u.uf.toLowerCase() === q);
+  const q = dobrar(query);
+  let rows = unidades.filter((u) => !q || (' ' + dobrar(u.nome)).includes(' ' + q) || dobrar(u.uf) === q);
   rows = rows.slice().sort((a, b) => {
     const x = col.val(a), y = col.val(b);
     if (x == null && y == null) return 0;
@@ -95,12 +97,12 @@ function desenhar(manterFoco: boolean): void {
     <div class="tb-wrap"><table class="tb">
       <thead><tr>${COLS.map((c) => {
         const ativo = c.id === sortId;
-        return `<th data-col="${c.id}" class="${c.txt ? '' : 'n'}" scope="col" aria-sort="${ativo ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}" tabindex="0">${c.rot}<span aria-hidden="true">${ativo ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</span></th>`;
+        return `<th data-col="${c.id}" class="${c.txt ? 'first' : 'n'}" scope="col" aria-sort="${ativo ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}" tabindex="0">${c.rot}<span aria-hidden="true">${ativo ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</span></th>`;
       }).join('')}</tr></thead>
       <tbody>${vis.map((u) => `<tr data-key="${esc(u.key)}" tabindex="0" class="${u.key === sel ? 'sel' : ''}">${COLS.map((c) => {
         const v = c.val(u);
-        const cls = c.id.startsWith('d') ? ' delta-' + (v == null ? 'z' : (v as number) > 0 ? 'p' : (v as number) < 0 ? 'm' : 'z') : '';
-        return `<td class="${c.txt ? '' : 'n'}${cls}">${v == null ? DASH : c.fmt(v)}</td>`;
+        const cls = '';
+        return `<td class="${c.txt ? 'first' : 'n'}${cls}">${v == null ? DASH : c.fmt(v)}</td>`;
       }).join('')}</tr>`).join('')}</tbody>
     </table></div>
     <div class="tb-pag"><button data-pg="-1" ${page === 0 ? 'disabled' : ''}>‹ Anterior</button>
